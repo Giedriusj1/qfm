@@ -52,11 +52,9 @@ helpFunc = do
   return ()
 
 mountAll = do
-  print "mounting"
-  -- retCodes <- mapM runAndWaitCommand m
-  -- [y] <- mapM waitForProcess [x]
+  putStr "mounting\n"
   print hostsList
-  retCodes <- mapM mount $ [a | a <- hostsList]
+  retCodes <- mapM mount hostsList
 
   return ()
 
