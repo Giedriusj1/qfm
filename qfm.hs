@@ -29,6 +29,12 @@ type MountPoint = String
 type Nickname   = String
 type Host = (Hostname, MountPoint, Nickname)    
 
+helpAlias       = ["help"]
+mountAllAlias   = ["all", "mountall"]
+unmountAllAlias = ["unmountall"]
+statsAlias      = ["stats"]
+
+    
 hostsList :: [Host]
 hostsList = parsedList
     where contents = unsafePerformIO $ readFile (unsafePerformIO getHomeDirectory ++"/.qfmHosts")
@@ -48,17 +54,23 @@ hostsList = parsedList
 
               
 helpFunc = do
-  print "This is a help function"
+  putStr "This is a help function"
   return ()
 
-mountAll = do
-  putStr "mounting\n"
-  print hostsList
+mountAllFunc = do
+  putStr "mounting all\n"
   retCodes <- mapM mount hostsList
 
   return ()
 
-stats = do
+unmountAllFunc = do
+  putStr "unmounting all\n"
+  retCodes <- mapM unmount hostsList
+
+  return ()
+
+         
+statsFunc = do
   print "stats function"
   return ()
              
@@ -69,16 +81,26 @@ main = do
   
         
   cond [ ((length name < 1) , print "no arguments provided"),
-         (name !! 0 == "help", helpFunc),
-         (name !! 0 == "all", mountAll),
-         (name !! 0 == "stats", stats)
+         (name !! 0 `elem` helpAlias,     helpFunc),
+         (name !! 0 `elem` mountAllAlias, mountAllFunc),
+         (name !! 0 `elem` unmountAllAlias, unmountAllFunc),
+         (name !! 0 `elem` statsAlias,    statsFunc)
        ]
 
   return ()
 
+unmount :: Host -> IO()
+unmount (hostname ,mountpoint,nickname) = do
+  putStr $  "Unmounting: " ++ hostname ++ " Mountpoint: " ++ mountpoint ++ "\n"
+  ret <- runAndWaitCommand $ "fusermount -u " ++ mountpoint
+  putStr $ show ret ++ "\n"
+  return ()
+         
 mount :: Host -> IO ()
-mount (hostname ,mountpoint,_) = do
+mount (hostname ,mountpoint,nickname) = do
+  putStr $  "Mounting: " ++ hostname ++ " Mountpoint: " ++ mountpoint ++ "\n"
   ret <- runAndWaitCommand $ "sshfs " ++ hostname ++ " " ++ mountpoint
+  putStr $ show ret ++ "\n"
   return ()
     where
       
@@ -86,6 +108,6 @@ mount (hostname ,mountpoint,_) = do
 runAndWaitCommand programName = do
   procHandle <- runCommand programName
   retCode <- waitForProcess procHandle
-  print "retcode:" 
-  print retCode
+  -- print "retcode:" 
+  -- print retCode
   return retCode
