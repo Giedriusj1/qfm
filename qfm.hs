@@ -30,9 +30,9 @@ type Nickname   = String
 type Host = (Hostname, MountPoint, Nickname)    
 
 helpAlias       = ["help"]
-mountAllAlias   = ["all", "mountall"]
-unmountAllAlias = ["unmountall"]
-statsAlias      = ["stats"]
+mountAllAlias   = ["all", "mountall", "a"]
+unmountAllAlias = ["unmountall", "ua"]
+statsAlias      = ["stats", "s"]
 
     
 hostsList :: [Host]
@@ -71,7 +71,7 @@ unmountAllFunc = do
 
          
 statsFunc = do
-  print "stats function"
+  ret <- runAndWaitCommand "mount -l -t fuse.sshfs"
   return ()
              
          
