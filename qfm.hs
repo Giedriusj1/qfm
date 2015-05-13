@@ -108,6 +108,4 @@ mount (hostname ,mountpoint,nickname) = do
 runAndWaitCommand programName = do
   procHandle <- runCommand programName
   retCode <- waitForProcess procHandle
-  -- print "retcode:" 
-  -- print retCode
   return retCode
