@@ -18,7 +18,6 @@
 import System.Environment
 import System.Process
 import System.Directory
-import Control.Monad
 import System.IO.Unsafe         -- for file reading
 import Data.List.Split          -- "cabal install split" is needed for this one
 import Control.Monad.IfElse
@@ -29,10 +28,17 @@ type MountPoint = String
 type Nickname   = String
 type Host = (Hostname, MountPoint, Nickname)    
 
-helpAlias       = ["help"]
-mountAllAlias   = ["all", "mountall", "a"]
+helpAlias :: [[Char]]
+helpAlias = ["help"]
+
+mountAllAlias :: [[Char]]
+mountAllAlias = ["all", "mountall", "a"]
+
+unmountAllAlias :: [[Char]]
 unmountAllAlias = ["unmountall", "ua"]
-statsAlias      = ["stats", "s"]
+
+statsAlias :: [[Char]]
+statsAlias = ["stats", "s"]
 
     
 hostsList :: [Host]
@@ -52,29 +58,34 @@ hostsList = parsedList
               -- filter out empty entries. This might happen with multiple spaces.
               where line = [n | n <- elemList, n /= ""]
 
-              
+
+helpFunc :: IO ()
 helpFunc = do
   putStr "This is a help function"
   return ()
 
+mountAllFunc :: IO ()
 mountAllFunc = do
   putStr "mounting all\n"
   retCodes <- mapM mount hostsList
 
   return ()
 
+unmountAllFunc :: IO ()
 unmountAllFunc = do
   putStr "unmounting all\n"
   retCodes <- mapM unmount hostsList
 
   return ()
 
-         
+
+statsFunc :: IO ()         
 statsFunc = do
-  ret <- runAndWaitCommand "mount -l -t fuse.sshfs"
+  ret <- runAndWaitCommand "mount -l -t fuse.sshfs "
   return ()
              
-         
+
+main :: IO ()
 main = do
   name <- getArgs
   print name
@@ -99,7 +110,7 @@ unmount (hostname ,mountpoint,nickname) = do
 mount :: Host -> IO ()
 mount (hostname ,mountpoint,nickname) = do
   putStr $  "Mounting: " ++ hostname ++ " Mountpoint: " ++ mountpoint ++ "\n"
-  ret <- runAndWaitCommand $ "sshfs " ++ hostname ++ " " ++ mountpoint
+  ret <- runAndWaitCommand $ "sshfs -o Ciphers=arcfour " ++ hostname ++ " " ++ mountpoint
   putStr $ show ret ++ "\n"
   return ()
     where
